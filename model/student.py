@@ -11,10 +11,10 @@ class Student:
     
     def __init__(
         self,
-        id: Literal[r'[0-9]{4}-[0-9]{4}'],
+        id: str | Literal[r'[0-9]{4}-[0-9]{4}'],
         name: tuple[str, str, str, str],
         year: int,
-        gender: Literal['MALE', 'FEMALE', 'OTHER'],
+        gender: str | Literal['MALE', 'FEMALE', 'OTHER'],
         program_code: str = ''
     ) -> None:
         if not Student.valid_id(id):
@@ -36,6 +36,9 @@ class Student:
     
     @name.setter
     def name(self, name: tuple[str, str, str, str]) -> None:
+        if not Student.valid_name(name):
+            raise ValueError('Name entered is not valid.')
+        
         self._name = name
         
     @property
@@ -63,7 +66,7 @@ class Student:
         return self._gender
     
     @gender.setter
-    def gender(self, gender: Literal['MALE', 'FEMALE', 'OTHER']) -> None:
+    def gender(self, gender: str | Literal['MALE', 'FEMALE', 'OTHER']) -> None:
         if not Student.valid_gender(gender):
             raise ValueError(f'Reconized gender values are {Student.VALID_GENDER_OPTIONS[0]}, {Student.VALID_GENDER_OPTIONS[1]}, {Student.VALID_GENDER_OPTIONS[2]}')
         
@@ -80,6 +83,13 @@ class Student:
     @staticmethod
     def valid_id(id: str) -> bool:
         return bool(re.match(Student.VALID_ID_PATTERN, id))
+    
+    @staticmethod
+    def valid_name(name: tuple[str, str, str, str]) -> bool:
+        return len(name[0]) > 0 and \
+               len(name[1]) > 0 and \
+               len(name[2]) >= 0 and \
+               len(name[3]) >= 0
     
     @staticmethod
     def valid_year(year: int) -> bool:

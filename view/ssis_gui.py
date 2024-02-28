@@ -97,7 +97,7 @@ class AddStudentWindow(Toplevel):
         self.middlename_entry = Entry(self, font=FONT_NORMAL)
         self.suffix_entry = Entry(self, font=FONT_NORMAL)
         
-        self.year_level_entry = Entry(self, font=FONT_NORMAL)
+        self.year_entry = Entry(self, font=FONT_NORMAL)
         
     def _set_comboboxes(self) -> None:
         self.gender_combobox = Combobox(self, font=FONT_NORMAL)
@@ -129,7 +129,7 @@ class AddStudentWindow(Toplevel):
         self.program_label.grid(row=9, column=0, rowspan= 1, columnspan= 1, sticky='w', padx=(15, 0), pady=0)
         
         self.id_entry.grid(row=1, column=0, rowspan=1, columnspan=2, sticky='nsew', padx=15)
-        self.year_level_entry.grid(row=1, column=2, rowspan=1, columnspan=1, sticky='nsew', padx=15)
+        self.year_entry.grid(row=1, column=2, rowspan=1, columnspan=1, sticky='nsew', padx=15)
         self.surname_entry.grid(row=4, column=0, rowspan=1, columnspan=2, sticky='nsew', padx=15)
         self.firstname_entry.grid(row=4, column=2, rowspan=1, columnspan=2, sticky='nsew', padx=15)
         self.middlename_entry.grid(row=4, column=4, rowspan=1, columnspan=2, sticky='nsew', padx=15)
