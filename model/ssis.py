@@ -1,6 +1,6 @@
 from model.student import Student, Program
 from csv import DictReader, DictWriter
-from typing import Iterable
+from typing import Collection
 
 class DuplicateProgramError(Exception):
     def __init__(self, program_code: str) -> None:
@@ -31,17 +31,17 @@ class SSIS:
         self.programs: dict[str, Program] = {}
         self.students: dict[str, Student] = {}
         
-        self._load_programs()
-        self._load_students()
+        self.__load_programs()
+        self.__load_students()
     
     @staticmethod
-    def create_csv_file(file_path: str, fieldnames: Iterable[str]) -> None:
+    def create_csv_file(file_path: str, fieldnames: Collection[str]) -> None:
         with open(file_path, 'w', newline='') as file:
             writer = DictWriter(file, fieldnames)
             
             writer.writeheader()
     
-    def _load_programs(self) -> None:
+    def __load_programs(self) -> None:
         try:
             with open(self.programs_path, 'r') as prog_file:
                 next(prog_file)
@@ -57,7 +57,7 @@ class SSIS:
         except FileNotFoundError:
             SSIS.create_csv_file(self.programs_path, SSIS.PROGRAM_FIELD_NAMES)
     
-    def _load_students(self) -> None:
+    def __load_students(self) -> None:
         try:
             with open(self.students_path, 'r') as stud_file:
                 next(stud_file)
@@ -88,9 +88,6 @@ class SSIS:
             writer.writeheader()
             
             for program in sorted(self.programs.values(), key=lambda program: program.code):
-                if program is SSIS.UNENROLLED_PROGRAM:
-                    continue
-                
                 writer.writerow({
                     'code': program.code,
                     'name': program.name
@@ -126,7 +123,7 @@ class SSIS:
         
         self.students[student.id] = student
         
-    def get_program_by_code(self, program_code) -> Program:
+    def get_program_by_code(self, program_code: str) -> Program:
         if program_code not in self.programs:
             raise ProgramNotFoundError(program_code)
         

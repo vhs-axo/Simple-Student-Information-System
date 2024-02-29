@@ -7,7 +7,7 @@ FONT_BOLD = ('', 10, 'bold')
 FONT_ITALIC = ('', 10, 'italic')
 
 class AddProgramWindow(Toplevel):
-    def __init__(self, master: SSISWindow | AddStudentWindow) -> None:
+    def __init__(self, master: SSISWindow) -> None:
         super().__init__(master)
         
         self.title('Add Program')

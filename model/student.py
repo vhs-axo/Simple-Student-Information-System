@@ -32,7 +32,7 @@ class Student:
         if not Student.valid_id(id):
             raise ValueError(f'ID must follow the format {Student.VALID_ID_PATTERN}')
         
-        self._id = id
+        self.__id = id
         self.name = name
         self.year = year
         self.gender = gender
@@ -41,12 +41,12 @@ class Student:
     @property
     def id(self) -> str:
         """str: The ID of the student."""
-        return self._id
+        return self.__id
     
     @property
     def name(self) -> tuple[str, str, str, str]:
         """tuple[str, str, str, str]: The name of the student."""
-        return self._name
+        return self.__name
     
     @name.setter
     def name(self, name: tuple[str, str, str, str]) -> None:
@@ -62,24 +62,24 @@ class Student:
         if not Student.valid_name(name):
             raise ValueError('Name entered is not valid.')
         
-        self._name = name
+        self.__name = name
         
     @property
     def name_formatted(self) -> str:
         """
         str: The formatted name of the student.
         """
-        name = f'{self._name[0]}, {self._name[1]}'
+        name = f'{self.__name[0]}, {self.__name[1]}'
         
-        name += f' {self._name[2]}' * bool(len(self._name[2]))
-        name += f' {self._name[3]}' * bool(len(self._name[3]))
+        name += f' {self.__name[2]}' * bool(len(self.__name[2]))
+        name += f' {self.__name[3]}' * bool(len(self.__name[3]))
         
         return name
         
     @property
     def year(self) -> int:
         """int: The year level of the student."""
-        return self._year
+        return self.__year
     
     @year.setter
     def year(self, year: int) -> None:
@@ -95,12 +95,12 @@ class Student:
         if not Student.valid_year(year):
             raise ValueError(f'Invalid year level. Must be within {Student.MIN_YEAR} and {Student.MAX_YEAR}')
         
-        self._year = year
+        self.__year = year
     
     @property
     def gender(self) -> str:
         """str: The gender of the student."""
-        return self._gender
+        return self.__gender
     
     @gender.setter
     def gender(self, gender: str | Literal['MALE', 'FEMALE', 'OTHER']) -> None:
@@ -116,12 +116,12 @@ class Student:
         if not Student.valid_gender(gender):
             raise ValueError(f'Reconized gender values are {Student.VALID_GENDER_OPTIONS[0]}, {Student.VALID_GENDER_OPTIONS[1]}, {Student.VALID_GENDER_OPTIONS[2]}')
         
-        self._gender = gender
+        self.__gender = gender
     
     @property
     def program_code(self) -> str:
         """str: The program code of the student."""
-        return self._program_code
+        return self.__program_code
     
     @program_code.setter
     def program_code(self, program_code: str) -> None:
@@ -131,7 +131,7 @@ class Student:
         Args:
             program_code (str): The program code of the student.
         """
-        self._program_code = program_code
+        self.__program_code = program_code
     
     @staticmethod
     def valid_id(id: str) -> bool:
@@ -195,7 +195,7 @@ class Student:
         Returns:
             str: A string representation of the Student object.
         """
-        return f'{self._id} | Name: {self.name_formatted}; Year: {self._year}; Gender: {self._gender}; Program Code: {self._program_code}'
+        return f'{self.__id} | Name: {self.name_formatted}; Year: {self.__year}; Gender: {self.__gender}; Program Code: {self.__program_code}'
 
 class Program:
     def __init__(self, code: str, name: str) -> None:
@@ -215,7 +215,7 @@ class Program:
     @property
     def code(self) -> str:
         """str: The code of the program."""
-        return self._code
+        return self.__code
     
     @code.setter
     def code(self, code: str) -> None:
@@ -231,12 +231,12 @@ class Program:
         if not Program.valid_program_code(code):
             raise ValueError('Invalid program code.')
         
-        self._code = code
+        self.__code = code
     
     @property
     def name(self) -> str:
         """str: The name of the program."""
-        return self._name
+        return self.__name
     
     @name.setter
     def name(self, name: str) -> None:
@@ -252,7 +252,7 @@ class Program:
         if not Program.valid_program_name(name):
             raise ValueError('Invalid program name.')
         
-        self._name = name
+        self.__name = name
         
     @staticmethod
     def valid_program_code(code: str) -> bool:
@@ -287,4 +287,4 @@ class Program:
         Returns:
             str: A string representation of the Program object.
         """
-        return f'{self.code} | {self.name}'
+        return f'{self.__code} | {self.__name}'
