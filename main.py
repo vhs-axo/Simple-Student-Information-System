@@ -1,8 +1,6 @@
-from view.ssis_gui import *
+from view.ssis_gui import SSISWindow
 from model.ssis import SSIS
 from control.controller import SSISController
-
-import tkinter as tk
 
 def main() -> None:
     programs_path = 'data/programs.csv'

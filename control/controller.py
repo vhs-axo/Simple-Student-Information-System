@@ -55,8 +55,8 @@ class AddProgramController:
                         code, 
                         self.add_student_controller
                     )
-            
-                self.gui.destroy()
+                    self.gui.destroy()
+                
                 return
             
             messagebox.showinfo(
@@ -206,8 +206,8 @@ class AddStudentController:
                         self.parent_controller, 
                         id
                     )
-
-                self.gui.destroy()
+                    self.gui.destroy()
+                
                 return
                 
             messagebox.showinfo(
