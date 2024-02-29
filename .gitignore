@@ -160,5 +160,7 @@ cython_debug/
 #.idea/
 
 *.pyc
-__pycache__/
+model/__pycache__/
+control/__pycache__/
+view/__pycache__/
 .vscode/
