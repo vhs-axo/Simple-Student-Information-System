@@ -2,6 +2,17 @@ from typing import Literal
 import re
 
 class Student:
+    """_summary_
+
+    Raises:
+        ValueError: _description_
+        ValueError: _description_
+        ValueError: _description_
+        ValueError: _description_
+
+    Returns:
+        _type_: _description_
+    """
     MIN_YEAR = 1
     MAX_YEAR = 6
     
