@@ -3,7 +3,7 @@ from typing import override
 from view.ssis_gui import SSISWindow, AddStudentWindow, AddProgramWindow
 from model.student import Student, Program
 from model.ssis import SSIS, DuplicateProgramError, DuplicateStudentError
-from tkinter import Menu, messagebox, END
+from tkinter import Event, Menu, StringVar, messagebox, END
 
 class AddProgramController:
     def __init__(
@@ -63,6 +63,7 @@ class AddProgramController:
             )
             
             self.parent_controller.load_programs()
+            self.parent_controller.load_students()
             
             if self.add_student_controller is not None:
                 self.add_student_controller.load_programs()
@@ -107,8 +108,14 @@ class EditProgramController(AddProgramController):
         self.gui.title('Edit Program')
         self.gui.add_program_button.config(text='Edit Program')
         
-        self.gui.program_code_entry.insert(0, self.program.code)
-        self.gui.program_name_entry.insert(0, self.program.name)
+        self.code_var = StringVar()
+        self.name_var = StringVar()
+        
+        self.gui.program_code_entry.config(textvariable=self.code_var)
+        self.gui.program_name_entry.config(textvariable=self.name_var)
+        
+        self.code_var.set(self.program.code)
+        self.name_var.set(self.program.name)
     
     @override
     def add_program_button_pressed(self) -> None:
@@ -125,6 +132,7 @@ class EditProgramController(AddProgramController):
             )
             
             self.parent_controller.load_programs()
+            self.parent_controller.load_students()
             
             if self.add_student_controller is not None:
                 self.add_student_controller.load_programs()
@@ -339,15 +347,31 @@ class EditStudentController(AddStudentController):
         self.gui.title('Edit Student')
         self.gui.add_student_button.config(text='Edit Student')
         
-        self.gui.id_entry.insert(0, self.student.id)
+        self.id_var = StringVar()
+        self.year_var = StringVar()
+        self.surname_var = StringVar()
+        self.firstname_var = StringVar()
+        self.middlename_var = StringVar()
+        self.suffix_var = StringVar()
+        
+        for entry, string_var in (
+            (self.gui.id_entry, self.id_var), 
+            (self.gui.year_entry, self.year_var), 
+            (self.gui.surname_entry, self.surname_var), 
+            (self.gui.firstname_entry, self.firstname_var), 
+            (self.gui.middlename_entry, self.middlename_var), 
+            (self.gui.suffix_entry, self.suffix_var)
+        ):
+            entry.config(textvariable=string_var)
+        
+        self.id_var.set(self.student.id)
+        self.year_var.set(str(self.student.year))
+        self.surname_var.set(self.student.name[0])
+        self.firstname_var.set(self.student.name[1])
+        self.middlename_var.set(self.student.name[2])
+        self.suffix_var.set(self.student.name[3])
+        
         self.gui.id_entry.config(state='readonly')
-        
-        self.gui.year_entry.insert(0, str(self.student.year))
-        
-        self.gui.surname_entry.insert(0, self.student.name[0])
-        self.gui.firstname_entry.insert(0, self.student.name[1])
-        self.gui.middlename_entry.insert(0, self.student.name[2])
-        self.gui.suffix_entry.insert(0, self.student.name[3])
         
         self.gui.gender_combobox.set(self.student.gender)
         
@@ -396,6 +420,7 @@ class SSISController:
         self.load_programs()
         self.load_students()
         
+        self.set_context_menus()
         self.set_actions()
     
     def load_programs(self) -> None:
@@ -433,6 +458,15 @@ class SSISController:
         self.gui.save_button.config(command=self.save_button_pressed)
         self.gui.add_student_button.config(command=self.add_student_button_pressed)
         self.gui.add_program_button.config(command=self.add_program_button_pressed)
+        
+        self.student_menu.add_command(label='Edit Student', command=self.edit_student)
+        self.student_menu.add_command(label='Delete Student', command=self.delete_student)
+        
+        self.program_menu.add_command(label='Edit Program', command=self.edit_program)
+        self.program_menu.add_command(label='Delete Program', command=self.delete_program)
+        
+        self.gui.student_list.bind('<Button-3>', self.show_student_menu)
+        self.gui.program_list.bind('<Button-3>', self.show_program_menu)
     
     def save_button_pressed(self) -> None:
         self.ssis.save_programs()
@@ -444,5 +478,70 @@ class SSISController:
     def add_program_button_pressed(self, add_student_controller: AddStudentController | None = None) -> None:
         AddProgramController(self.ssis, AddProgramWindow(self.gui), self, add_student_controller)
         
-    def context_menu(self) -> None:
-        self.context_menu
+    def set_context_menus(self) -> None:
+        self.student_menu = Menu(self.gui.student_tab, tearoff=0)
+        self.program_menu = Menu(self.gui.program_tab, tearoff=0)
+        
+    def show_student_menu(self, event: Event) -> None:
+        student_id = self.gui.student_list.identify_row(event.y)
+        
+        if student_id:
+            self.gui.student_list.selection_set(student_id)
+            self.student_menu.post(event.x_root, event.y_root)
+    
+    def show_program_menu(self, event: Event) -> None:
+        program_code = self.gui.program_list.identify_row(event.y)
+        
+        if program_code:
+            self.gui.program_list.selection_set(program_code)
+            self.program_menu.post(event.x_root, event.y_root)
+    
+    def edit_student(self) -> None:
+        EditStudentController(
+            self.ssis, 
+            AddStudentWindow(self.gui), 
+            self, 
+            self.gui.student_list.selection()[0]
+        )
+    
+    def edit_program(self) -> None:
+        EditProgramController(
+            self.ssis, 
+            AddProgramWindow(self.gui),
+            self,
+            self.gui.program_list.selection()[0]
+        )
+    
+    def delete_student(self) -> None:
+        student = self.ssis.get_student_by_id(id := self.gui.student_list.selection()[0])
+        
+        if messagebox.askyesno(
+            'Delete Student',
+            f'Are you sure you want to delete student "{student.id}" with:\n\tName "{student.name_formatted}",\n\tYear "{student.year}",\n\tGender "{student.gender}",\n\tProgram Code "{student.program_code}"'
+        ):
+            student = self.ssis.delete_student_by_id(id)
+            
+            self.load_students()
+        
+            messagebox.showinfo(
+                'Student Deleted Successfully',
+                f'Student "{student.id}" was deleted successfully!'
+            )
+    
+    def delete_program(self) -> None:
+        program = self.ssis.get_program_by_code(code := self.gui.program_list.selection()[0])
+        
+        if messagebox.askyesno(
+            'Delete Program',
+            f'Are you sure you want to delete the program "{program}" ?'
+        ):
+            program = self.ssis.delete_program_by_code(code)
+            
+            self.load_programs()
+            self.load_students()
+        
+            messagebox.showinfo(
+                'Program Deleted Successfully',
+                f'Program "{program.code}" was deleted successfully!'
+            )
+    
