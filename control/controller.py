@@ -6,6 +6,8 @@ from model.ssis import SSIS, DuplicateProgramError, DuplicateStudentError
 from tkinter import Event, Menu, StringVar, messagebox, END
 
 class AddProgramController:
+    """Controller for adding a new program."""
+    
     def __init__(
             self, 
             ssis: SSIS, 
@@ -13,6 +15,15 @@ class AddProgramController:
             parent_controller: SSISController,
             add_student_controller: AddStudentController | None = None
         ) -> None:
+        """
+        Initialize the AddProgramController.
+
+        Args:
+            ssis (SSIS): The SSIS model.
+            gui (AddProgramWindow): The GUI window for adding a program.
+            parent_controller (SSISController): The parent controller.
+            add_student_controller (AddStudentController | None, optional): The controller for adding a student. Defaults to None.
+        """
         self.ssis = ssis
         self.gui = gui
         self.parent_controller = parent_controller
@@ -22,30 +33,38 @@ class AddProgramController:
         self.set_validations()
     
     def set_actions(self) -> None:
+        """Set actions for GUI elements."""
         self.gui.add_program_button.config(command=self.add_program_button_pressed)
         
     def set_validations(self) -> None:
+        """Set input validations for program code and name."""
         self.program_code_validation()
         self.program_name_validation()
-        
+    
     def add_program_button_pressed(self) -> None:
+        """Handle button press for adding a program."""
         code = self.gui.program_code_entry.get()
         name = self.gui.program_name_entry.get()
         
+        # Validate program code and name
         if (pcv := Program.valid_program_code(code)) and (pnv := Program.valid_program_name(name)):
             try:
+                # Attempt to add the program to the SSIS model
                 self.ssis.add_program(program := Program(
                     code.upper().strip(),
                     name.upper().strip()
                 ))
             
             except DuplicateProgramError:
+                # If program already exists, show error message
                 messagebox.showerror(
                     'Program Aleady Exists',
                     f'Program "{self.ssis.get_program_by_code(code)}" already exists.'
                 )
                 
+                # Ask user if they want to edit the existing program
                 if messagebox.askyesno('Program Aleady Exists', f'Do you want to edit the existing program instead?'):
+                    # Initialize EditProgramController and destroy current window
                     EditProgramController(
                         self.ssis, 
                         AddProgramWindow(self.gui.master), 
@@ -57,9 +76,10 @@ class AddProgramController:
                 
                 return
             
+            # Show success message and update parent controller
             messagebox.showinfo(
                 'Program Added Successfully!',
-                f'Program with:\n\tCode "{program.code}",\n\tName {program.name}\nadded successfully!'
+                f'Program with:\n\tCode "{program.code}",\n\tName "{program.name}"\nadded successfully!'
             )
             
             self.parent_controller.load_programs()
@@ -71,6 +91,7 @@ class AddProgramController:
             self.gui.destroy()
         
         else:
+            # Show error message for invalid input
             invalid_code_message = f'"{code.upper().strip()}" is not a valid program code.' * (not pcv)
             invalid_name_message = f'"{name.upper().strip()}" is not a valid program name.' * (not pnv)
             
@@ -80,16 +101,20 @@ class AddProgramController:
             )
     
     def program_code_validation(self) -> None:
+        """Set validation for program code entry."""
         validate_cmd = self.gui.register(lambda change: change.isalpha() or change in '()' or change.isspace())
         
         self.gui.program_code_entry.config(validate='key', validatecommand=(validate_cmd, '%S'))
         
     def program_name_validation(self) -> None:
+        """Set validation for program name entry."""
         validate_cmd = self.gui.register(lambda change: change.isalpha() or change in '()' or change.isspace())
         
         self.gui.program_name_entry.config(validate='key', validatecommand=(validate_cmd, '%S'))
 
 class EditProgramController(AddProgramController):
+    """Controller for editing an existing program."""
+    
     def __init__(
         self, 
         ssis: SSIS, 
@@ -98,6 +123,16 @@ class EditProgramController(AddProgramController):
         program_code: str, 
         add_student_controller: AddStudentController | None = None
     ) -> None:
+        """
+        Initialize the EditProgramController.
+
+        Args:
+            ssis (SSIS): The SSIS model.
+            gui (AddProgramWindow): The GUI window for editing a program.
+            parent_controller (SSISController): The parent controller.
+            program_code (str): The code of the program to edit.
+            add_student_controller (AddStudentController | None, optional): The controller for adding a student. Defaults to None.
+        """
         super().__init__(ssis, gui, parent_controller, add_student_controller)
         
         self.program = self.ssis.get_program_by_code(program_code)
@@ -105,6 +140,7 @@ class EditProgramController(AddProgramController):
         self.__load_data()
         
     def __load_data(self) -> None:
+        """Load data for editing the program."""
         self.gui.title('Edit Program')
         self.gui.add_program_button.config(text='Edit Program')
         
@@ -119,10 +155,12 @@ class EditProgramController(AddProgramController):
     
     @override
     def add_program_button_pressed(self) -> None:
+        """Handle button press for editing a program."""
         code = self.gui.program_code_entry.get().upper().strip()
         name = self.gui.program_name_entry.get().upper().strip()
         
         if (pcv := Program.valid_program_code(code)) and (pnv := Program.valid_program_name(name)):
+            # Update program details
             self.program.code = code
             self.program.name = name
             
@@ -140,6 +178,7 @@ class EditProgramController(AddProgramController):
             self.gui.destroy()
         
         else:
+            # Show error message for invalid input
             invalid_code_message = f'"{code.upper().strip()}" is not a valid program code.' * (not pcv)
             invalid_name_message = f'"{name.upper().strip()}" is not a valid program name.' * (not pnv)
             
@@ -274,28 +313,24 @@ class AddStudentController:
     
     def id_validation(self) -> None:
         def id_val(text: str, change: str, new_text: str) -> bool:
+            # Check if the length of new text is less than the length of old text
             if len(new_text) < len(text):
                 return True
             
+            # Check the length of the text
             if len(text) <= 8:
+                # If the length is less than 3, only allow digits
                 if len(text) < 3:
-                    if change.isdigit():
-                        return True
-                    else:
-                        return False
+                    return change.isdigit()
+                # If the length is 4, only allow '-'
                 elif len(text) == 4:
-                    if change == '-':
-                        return True
-                    else:
-                        return False
+                    return change == '-'
+                # For other lengths, allow only digits
                 else:
-                    if change.isdigit():
-                        return True
-                    else:
-                        return False
+                    return change.isdigit()
             
             return False
-        
+
         validation = self.gui.register(id_val)
         self.gui.id_entry.config(validate='key', validatecommand=(validation, '%s','%S', '%P'))
     
