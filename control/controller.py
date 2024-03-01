@@ -101,6 +101,8 @@ class EditProgramController(AddProgramController):
         
         self.program = self.ssis.get_program_by_code(program_code)
         
+        self.__load_data()
+        
     def __load_data(self) -> None:
         self.gui.title('Edit Program')
         self.gui.add_program_button.config(text='Edit Program')
@@ -150,6 +152,7 @@ class AddStudentController:
         self.parent_controller = parent_controller
         
         self.set_actions()
+        self.set_validations()
         
         self.load_genders()
         self.load_programs()
@@ -173,6 +176,14 @@ class AddStudentController:
         self.gui.add_student_button.config(
             command=self.add_student_button_pressed
         )
+        
+    def set_validations(self) -> None:
+        self.id_validation()
+        self.year_validation()
+        self.surname_validation()
+        self.firstname_validation()
+        self.middlename_validation()
+        self.suffix_validation()
     
     def add_student_button_pressed(self) -> None:
         valid_i = Student.valid_id(id := self.get_id())
@@ -252,6 +263,63 @@ class AddStudentController:
     
     def get_program_code(self) -> str:
         return self.gui.program_combobox.get().split('|')[0].strip()
+    
+    def id_validation(self) -> None:
+        def id_val(text: str, change: str, new_text: str) -> bool:
+            if len(new_text) < len(text):
+                return True
+            
+            if len(text) <= 8:
+                if len(text) < 3:
+                    if change.isdigit():
+                        return True
+                    else:
+                        return False
+                elif len(text) == 4:
+                    if change == '-':
+                        return True
+                    else:
+                        return False
+                else:
+                    if change.isdigit():
+                        return True
+                    else:
+                        return False
+            
+            return False
+        
+        validation = self.gui.register(id_val)
+        self.gui.id_entry.config(validate='key', validatecommand=(validation, '%s','%S', '%P'))
+    
+    def year_validation(self) -> None:
+        def year_val(text: str) -> bool:
+            if len(text) == 0:
+                return True
+            
+            if text.isdigit():
+                if Student.MIN_YEAR <= int(text) <= Student.MAX_YEAR:
+                    return True
+            
+            return False
+        
+        validation = self.gui.register(year_val)
+        self.gui.year_entry.config(validate='key', validatecommand=(validation, '%P'))
+    
+    def surname_validation(self) -> None:
+        validation = self.gui.register(lambda change: change.isalpha() or change.isspace())
+        self.gui.surname_entry.config(validate='key', validatecommand=(validation, '%S'))
+    
+    def firstname_validation(self) -> None:
+        validation = self.gui.register(lambda change: change.isalpha() or change.isspace())
+        self.gui.firstname_entry.config(validate='key', validatecommand=(validation, '%S'))
+    
+    def middlename_validation(self) -> None:
+        validation = self.gui.register(lambda change: change.isalpha() or change.isspace())
+        self.gui.middlename_entry.config(validate='key', validatecommand=(validation, '%S'))
+    
+    def suffix_validation(self) -> None:
+        validation = self.gui.register(lambda change: change.isalpha() or change == '.')
+        self.gui.suffix_entry.config(validate='key', validatecommand=(validation, '%S'))
 
 class EditStudentController(AddStudentController):
     def __init__(
@@ -365,7 +433,7 @@ class SSISController:
         self.gui.save_button.config(command=self.save_button_pressed)
         self.gui.add_student_button.config(command=self.add_student_button_pressed)
         self.gui.add_program_button.config(command=self.add_program_button_pressed)
-
+    
     def save_button_pressed(self) -> None:
         self.ssis.save_programs()
         self.ssis.save_students()
@@ -375,3 +443,6 @@ class SSISController:
     
     def add_program_button_pressed(self, add_student_controller: AddStudentController | None = None) -> None:
         AddProgramController(self.ssis, AddProgramWindow(self.gui), self, add_student_controller)
+        
+    def context_menu(self) -> None:
+        self.context_menu
