@@ -1,7 +1,5 @@
 from __future__ import annotations
-import stat
-from typing import Literal, override
-from model import student
+from typing import override
 from view.ssis_gui import SSISWindow, AddStudentWindow, AddProgramWindow
 from model.student import Student, Program
 from model.ssis import SSIS, DuplicateProgramError, DuplicateStudentError
