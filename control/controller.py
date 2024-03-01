@@ -506,6 +506,11 @@ class SSISController:
     def save_button_pressed(self) -> None:
         self.ssis.save_programs()
         self.ssis.save_students()
+        
+        messagebox.showinfo(
+            'Saved',
+            'Changes have been saved successfully!'
+        )
     
     def add_student_button_pressed(self) -> None:
         AddStudentController(self.ssis, AddStudentWindow(self.gui), self)
