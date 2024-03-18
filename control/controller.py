@@ -457,6 +457,14 @@ class SSISController:
         
         self.set_context_menus()
         self.set_actions()
+        
+        self.gui.protocol('WM_DELETE_WINDOW', self.warning_close)
+        
+    def warning_close(self) -> None:
+        if messagebox.askyesno('Exit', 'Save before exit?'):
+            self.save_button_pressed()
+        
+        self.gui.destroy()
     
     def load_programs(self) -> None:
         self.gui.program_list.delete(*self.gui.program_list.get_children())
