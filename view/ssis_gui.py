@@ -7,7 +7,7 @@ FONT_BOLD = ('', 10, 'bold')
 FONT_ITALIC = ('', 10, 'italic')
 
 class AddProgramWindow(Toplevel):
-    """Class representing the window for adding a program."""
+    '''Class representing the window for adding a program.'''
 
     def __init__(self, master: SSISWindow) -> None:
         super().__init__(master)
@@ -25,21 +25,21 @@ class AddProgramWindow(Toplevel):
         self.grab_set()
     
     def _set_labels(self) -> None:
-        """Create labels."""
+        '''Create labels.'''
         self.program_code_label = Label(self, text='Program Code')
         self.program_name_label = Label(self, text='Program Name')
     
     def _set_entries(self) -> None:
-        """Create entry fields."""
+        '''Create entry fields.'''
         self.program_code_entry = Entry(self, font=FONT_NORMAL)
         self.program_name_entry = Entry(self, font=FONT_NORMAL)
     
     def _set_button(self) -> None:
-        """Create button."""
+        '''Create button.'''
         self.add_program_button = Button(self, text='Add Program')
     
     def _set_layout(self) -> None:
-        """Define layout of widgets."""
+        '''Define layout of widgets.'''
         self.style = Style()
         
         width = int(self.winfo_screenwidth() / 2)
@@ -66,7 +66,7 @@ class AddProgramWindow(Toplevel):
         self.style.configure('TButton', font=FONT_BOLD)
 
 class AddStudentWindow(Toplevel):
-    """Class representing the window for adding a student."""
+    '''Class representing the window for adding a student.'''
 
     def __init__(self, master: SSISWindow) -> None:
         super().__init__(master=master)
@@ -84,7 +84,7 @@ class AddStudentWindow(Toplevel):
         self.grab_set()
         
     def _set_labels(self) -> None:
-        """Create labels."""
+        '''Create labels.'''
         self.id_label = Label(self, text='Student ID')
         self.surname_label = Label(self, text='Surname')
         self.firstname_label = Label(self, text='First Name')
@@ -95,7 +95,7 @@ class AddStudentWindow(Toplevel):
         self.program_label = Label(self, text='Program')
     
     def _set_entries(self) -> None:
-        """Create entry fields."""
+        '''Create entry fields.'''
         self.id_entry = Entry(self, font=FONT_NORMAL)
         self.surname_entry = Entry(self, font=FONT_NORMAL)
         self.firstname_entry = Entry(self, font=FONT_NORMAL)
@@ -104,17 +104,17 @@ class AddStudentWindow(Toplevel):
         self.year_entry = Entry(self, font=FONT_NORMAL)
     
     def _set_comboboxes(self) -> None:
-        """Create comboboxes."""
+        '''Create comboboxes.'''
         self.gender_combobox = Combobox(self, font=FONT_NORMAL)
         self.program_combobox = Combobox(self, font=FONT_NORMAL)
     
     def _set_buttons(self) -> None:
-        """Create buttons."""
+        '''Create buttons.'''
         self.add_student_button = Button(self, text='Add Student', style='AddStudent.TButton')
         self.add_program_button = Button(self, text='Program not found? Add program here!', style='AddProgram.TButton')
         
     def _set_layout(self) -> None:
-        """Define layout of widgets."""        
+        '''Define layout of widgets.'''        
         width = int(self.winfo_screenwidth() * 0.75)
         height = int(width * 2 / 5)
         
@@ -150,13 +150,13 @@ class AddStudentWindow(Toplevel):
         
         self.style = Style()
         
-        self.option_add("*TCombobox*Listbox*Font", FONT_NORMAL)
+        self.option_add('*TCombobox*Listbox*Font', FONT_NORMAL)
         self.style.configure('TLabel', font=FONT_BOLD)
         self.style.configure('AddStudent.TButton', font=FONT_BOLD)
         self.style.configure('AddProgram.TButton', font=FONT_ITALIC)
 
 class SSISWindow(Tk):
-    """Class representing the main window of the Student Information System."""
+    '''Class representing the main window of the Student Information System.'''
 
     def __init__(self) -> None:
         super().__init__()
@@ -168,17 +168,17 @@ class SSISWindow(Tk):
         self._set_layout()
         
     def _init_buttons(self) -> None:
-        """Initialize buttons."""
+        '''Initialize buttons.'''
         self.save_button = Button(self, text='Save Changes')
         self.add_student_button = Button(self, text='Add Student')
         self.add_program_button = Button(self, text='Add Program')
     
     def _init_notebook(self) -> None:
-        """Initialize notebook."""
+        '''Initialize notebook.'''
         self.notebook = Notebook(self)
     
     def _init_tabs(self) -> None:
-        """Initialize tabs."""
+        '''Initialize tabs.'''
         self.student_tab = Frame(self.notebook)
         
         self.student_list = Treeview(
@@ -222,7 +222,7 @@ class SSISWindow(Tk):
         self.notebook.add(self.program_tab, state='normal', text='Programs')
 
     def _set_layout(self) -> None:
-        """Define layout of widgets."""
+        '''Define layout of widgets.'''
         self.title('Simple Student Information System')
         self.state('zoomed')
         self.resizable(False, True)
