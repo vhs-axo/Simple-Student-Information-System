@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import override
+# from typing import override
 from view.ssis_gui import SSISWindow, AddStudentWindow, AddProgramWindow
 from model.student import Student, Program
 from model.ssis import SSIS, DuplicateProgramError, DuplicateStudentError
@@ -153,7 +153,7 @@ class EditProgramController(AddProgramController):
         self.code_var.set(self.program.code)
         self.name_var.set(self.program.name)
     
-    @override
+    # @override
     def add_program_button_pressed(self) -> None:
         """Handle button press for editing a program."""
         code = self.gui.program_code_entry.get().upper().strip()
@@ -412,7 +412,7 @@ class EditStudentController(AddStudentController):
         
         self.gui.program_combobox.set(self.ssis.get_program_by_code(self.student.program_code))
     
-    @override
+    # @override
     def add_student_button_pressed(self) -> None:
         valid_i = Student.valid_id(id := super().get_id())
         valid_n = Student.valid_name(name := super().get_name())
