@@ -1,4 +1,5 @@
-from typing import Literal
+from __future__ import annotations
+from typing import Literal, Optional
 import re
 
 class Student:
@@ -9,28 +10,15 @@ class Student:
     VALID_GENDER_OPTIONS = ('MALE', 'FEMALE', 'OTHER')
     
     def __init__(
-        self,
-        id: str | Literal[r'[0-9]{4}-[0-9]{4}'],
-        name: tuple[str, str, str, str],
-        year: int,
-        gender: str | Literal['MALE', 'FEMALE', 'OTHER'],
-        program_code: str = ''
+        self, 
+        id: str, 
+        name: tuple[str, str, Optional[str], Optional[str]], 
+        year: int, 
+        gender: Literal['MALE', 'FEMALE', 'OTHER'], 
+        program_code: Optional[str] = None
     ) -> None:
-        """
-        Initialize a Student object.
-
-        Args:
-            id (str): The ID of the student.
-            name (tuple[str, str, str, str]): The name of the student, in the format (first_name, middle_name, last_name, suffix).
-            year (int): The year level of the student.
-            gender (str): The gender of the student.
-            program_code (str, optional): The program code of the student. Defaults to ''.
-        
-        Raises:
-            ValueError: If ID, name, year, or gender is invalid.
-        """
         if not Student.valid_id(id):
-            raise ValueError(f'ID must follow the format {Student.VALID_ID_PATTERN}')
+            raise ValueError(f'{id!r} does not match the valid pattern {Student.VALID_ID_PATTERN!r}')
         
         self.__id = id
         self.name = name
@@ -40,251 +28,147 @@ class Student:
     
     @property
     def id(self) -> str:
-        """str: The ID of the student."""
         return self.__id
     
     @property
-    def name(self) -> tuple[str, str, str, str]:
-        """tuple[str, str, str, str]: The name of the student."""
+    def name(self) -> tuple[str, str, Optional[str], Optional[str]]:
         return self.__name
     
-    @name.setter
-    def name(self, name: tuple[str, str, str, str]) -> None:
-        """
-        Set the name of the student.
-
-        Args:
-            name (tuple[str, str, str, str]): The name of the student, in the format (first_name, middle_name, last_name, suffix).
-
-        Raises:
-            ValueError: If the name is invalid.
-        """
-        if not Student.valid_name(name):
-            raise ValueError('Name entered is not valid.')
-        
-        self.__name = name
-        
     @property
     def name_formatted(self) -> str:
-        """
-        str: The formatted name of the student.
-        """
         name = f'{self.__name[0]}, {self.__name[1]}'
         
-        name += f' {self.__name[2]}' * bool(len(self.__name[2]))
-        name += f' {self.__name[3]}' * bool(len(self.__name[3]))
+        name += f' {self.__name[2]}' * bool(self.__name[2])
+        name += f' {self.__name[3]}' * bool(self.__name[3])
         
         return name
-        
+    
     @property
     def year(self) -> int:
-        """int: The year level of the student."""
         return self.__year
-    
-    @year.setter
-    def year(self, year: int) -> None:
-        """
-        Set the year level of the student.
-
-        Args:
-            year (int): The year level of the student.
-
-        Raises:
-            ValueError: If the year level is invalid.
-        """
-        if not Student.valid_year(year):
-            raise ValueError(f'Invalid year level. Must be within {Student.MIN_YEAR} and {Student.MAX_YEAR}')
-        
-        self.__year = year
     
     @property
     def gender(self) -> str:
-        """str: The gender of the student."""
         return self.__gender
     
-    @gender.setter
-    def gender(self, gender: str | Literal['MALE', 'FEMALE', 'OTHER']) -> None:
-        """
-        Set the gender of the student.
-
-        Args:
-            gender (str): The gender of the student.
-
-        Raises:
-            ValueError: If the gender is not recognized.
-        """
-        if not Student.valid_gender(gender):
-            raise ValueError(f'Reconized gender values are {Student.VALID_GENDER_OPTIONS[0]}, {Student.VALID_GENDER_OPTIONS[1]}, {Student.VALID_GENDER_OPTIONS[2]}')
-        
-        self.__gender = gender
-    
     @property
-    def program_code(self) -> str:
-        """str: The program code of the student."""
+    def program_code(self) -> Optional[str]:
         return self.__program_code
     
+    @name.setter
+    def name(self, name: tuple[str, str, Optional[str], Optional[str]]) -> None:
+        if not (v_name := Student.valid_name(name)):
+            raise ValueError(f'{name} is not a valid name.')
+        
+        self.__name = v_name
+    
+    @year.setter
+    def year(self, year: int) -> None:
+        if not Student.valid_year(year):
+            raise ValueError(f'Year must be in the range {Student.MIN_YEAR} to {Student.MAX_YEAR}.')
+        
+        self.__year = year
+    
+    @gender.setter
+    def gender(self, gender: Literal['MALE', 'FEMALE', 'OTHER']) -> None:
+        if not (v_gender := Student.valid_gender(gender)):
+            raise ValueError(f'Invalid gender {gender!r} value entered.')
+        
+        self.__gender = v_gender
+    
     @program_code.setter
-    def program_code(self, program_code: str) -> None:
-        """
-        Set the program code of the student.
-
-        Args:
-            program_code (str): The program code of the student.
-        """
+    def program_code(self, program_code: Optional[str]) -> None:
+        if not program_code:
+            self.__program_code = None
+            return
+        
+        if not Program.valid_code(program_code):
+            raise ValueError(f'{program_code!r} is not a valid program code.')
+        
         self.__program_code = program_code
+        
+    @staticmethod
+    def valid_id(id: str) -> Optional[str]:
+        if re.match(Student.VALID_ID_PATTERN, id):
+            return id
+        
+        return None
     
     @staticmethod
-    def valid_id(id: str) -> bool:
-        """
-        Check if the provided ID is valid.
-
-        Args:
-            id (str): The ID to validate.
-
-        Returns:
-            bool: True if the ID is valid, False otherwise.
-        """
-        return bool(re.match(Student.VALID_ID_PATTERN, id))
+    def valid_name(name: tuple[str, str, Optional[str], Optional[str]]) -> Optional[tuple[str, str, Optional[str], Optional[str]]]:
+        if not (name[0] and name[1]):
+            return None
+        
+        return (
+            name[0], 
+            name[1], 
+            name[2] if name[2] else None, 
+            name[3] if name[3] else None
+        )
     
     @staticmethod
-    def valid_name(name: tuple[str, str, str, str]) -> bool:
-        """
-        Check if the provided name is valid.
-
-        Args:
-            name (tuple[str, str, str, str]): The name to validate.
-
-        Returns:
-            bool: True if the name is valid, False otherwise.
-        """
-        return len(name[0]) > 0 and \
-               len(name[1]) > 0 and \
-               len(name[2]) >= 0 and \
-               len(name[3]) >= 0
+    def valid_year(year: int) -> Optional[int]:
+        if Student.MIN_YEAR <= year <= Student.MAX_YEAR:
+            return year
+        
+        return None
     
     @staticmethod
-    def valid_year(year: int) -> bool:
-        """
-        Check if the provided year is valid.
-
-        Args:
-            year (int): The year to validate.
-
-        Returns:
-            bool: True if the year is valid, False otherwise.
-        """
-        return Student.MIN_YEAR <= year <= Student.MAX_YEAR
-    
-    @staticmethod
-    def valid_gender(gender: str) -> bool:
-        """
-        Check if the provided gender is valid.
-
-        Args:
-            gender (str): The gender to validate.
-
-        Returns:
-            bool: True if the gender is valid, False otherwise.
-        """
-        return gender in Student.VALID_GENDER_OPTIONS
+    def valid_gender(gender: str) -> Optional[str]:
+        if (g := gender.upper()) in Student.VALID_GENDER_OPTIONS:
+            return g
+        
+        return None
     
     def __str__(self) -> str:
-        """
-        Return a string representation of the Student object.
-
-        Returns:
-            str: A string representation of the Student object.
-        """
-        return f'{self.__id} | Name: {self.name_formatted}; Year: {self.__year}; Gender: {self.__gender}; Program Code: {self.__program_code}'
+        return f'{self.__id} | {self.name_formatted} | Year {self.__year} | {self.__gender} | {self.__program_code}'
+    
+    def __repr__(self) -> str:
+        return f'Student(id={self.__id!r}, name={self.__name}, year={self.__year}, gender={self.__gender!r}, program_code={self.__program_code!r})'
 
 class Program:
     def __init__(self, code: str, name: str) -> None:
-        """
-        Initialize a Program object.
-
-        Args:
-            code (str): The code of the program.
-            name (str): The name of the program.
-
-        Raises:
-            ValueError: If code or name is invalid.
-        """
         self.code = code
         self.name = name
-        
+    
     @property
     def code(self) -> str:
-        """str: The code of the program."""
         return self.__code
-    
-    @code.setter
-    def code(self, code: str) -> None:
-        """
-        Set the code of the program.
-
-        Args:
-            code (str): The code of the program.
-
-        Raises:
-            ValueError: If the code is invalid.
-        """
-        if not Program.valid_program_code(code):
-            raise ValueError('Invalid program code.')
-        
-        self.__code = code
     
     @property
     def name(self) -> str:
-        """str: The name of the program."""
         return self.__name
+    
+    @code.setter
+    def code(self, code: str) -> None:
+        if not Program.valid_code(code):
+            raise ValueError(f'{code!r} is an invalid program code.')
+        
+        self.__code = code
     
     @name.setter
     def name(self, name: str) -> None:
-        """
-        Set the name of the program.
-
-        Args:
-            name (str): The name of the program.
-
-        Raises:
-            ValueError: If the name is invalid.
-        """
-        if not Program.valid_program_name(name):
-            raise ValueError('Invalid program name.')
+        if not Program.valid_name(name):
+            raise ValueError(f'{name!r} is an invalid program name.')
         
         self.__name = name
-        
+    
     @staticmethod
-    def valid_program_code(code: str) -> bool:
-        """
-        Check if the provided program code is valid.
-
-        Args:
-            code (str): The program code to validate.
-
-        Returns:
-            bool: True if the program code is valid, False otherwise.
-        """
-        return len(code) > 2
+    def valid_code(code: str) -> Optional[str]:
+        if len(code) > 2:
+            return code
         
+        return None
+    
     @staticmethod
-    def valid_program_name(name: str) -> bool:
-        """
-        Check if the provided program name is valid.
-
-        Args:
-            name (str): The program name to validate.
-
-        Returns:
-            bool: True if the program name is valid, False otherwise.
-        """
-        return len(name) > 12
+    def valid_name(name: str) -> Optional[str]:
+        if len(name) > 12:
+            return name
+        
+        return None
     
     def __str__(self) -> str:
-        """
-        Return a string representation of the Program object.
-
-        Returns:
-            str: A string representation of the Program object.
-        """
         return f'{self.__code} | {self.__name}'
+    
+    def __repr__(self) -> str:
+        return f'Program(code={self.__code!r}, name={self.__name!r})'
